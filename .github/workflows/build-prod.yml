@@ -1,0 +1,26 @@
+name: Build production
+
+on:
+  push:
+    branches:
+      - main
+  
+  workflow_dispatch:
+
+env:
+  NG_CLI_ANALYTICS: ci
+
+jobs:
+  build-prod-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build prod image
+        run: docker build -t "ghcr.io/${GITHUB_REPOSITORY}:${GITHUB_SHA}" -f Dockerfile .
+
+      - name: GHCR Login
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: Push image
+        run: docker push ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
